@@ -19,7 +19,7 @@
 
     <!-- 구글폰트 -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
 
 
     <title>스파르타코딩클럽 | 나홀로 메모장</title>
@@ -27,7 +27,7 @@
     <!-- style -->
     <style type="text/css">
         * {
-           font-family: 'Nanum Myeongjo', serif;
+            font-family: 'Nanum Myeongjo', serif;
         }
 
         body {
@@ -57,7 +57,7 @@
         }
 
         .post-box {
-            width: 500px;
+            width: 330px;
             margin: 20px auto;
             padding: 50px;
             border: black solid;
@@ -66,13 +66,13 @@
 
         .display-4 {
             text-align: center;
-            width: 500px;
+            width: 330px;
             margin: 20px auto;
         }
 
         .lead {
             text-align: center;
-            width: 500px;
+            width: 330px;
             margin: 20px auto;
         }
 
@@ -93,7 +93,9 @@
             let name = $('#name').val();
             let company = $('#company').val();
             let comment = $('#comment').val();
-            let ref_url = $('#ref-url').val()
+            let ref_url = $('#ref-url').val();
+            let agree = 0;
+            let disagree = 0;
 
             if (category == '') {
                 alert('카테고리를 선택해주세요')
@@ -117,7 +119,9 @@
                     name_give: name,
                     company_give: company,
                     comment_give: comment,
-                    ref_url_give: ref_url
+                    ref_url_give: ref_url,
+                    agree_give: agree,
+                    disagree_give: disagree
                 },
                 success: function (response) { // 성공하면
                     if (response["result"] == "success") {
@@ -139,7 +143,7 @@
                         for (let i = 0; i < reviews.length; i++) {
 
 
-                            makeCard(reviews[i]["category"], reviews[i]["image"], reviews[i]["name"], reviews[i]["company"], reviews[i]["comment"], reviews[i]["ref"]);
+                            makeCard(reviews[i]["category"], reviews[i]["image"], reviews[i]["name"], reviews[i]["company"], reviews[i]["comment"], reviews[i]["ref"], reviews[i]["agree"], reviews[i]["disagree"]);
                         }
                     } else {
                         alert('리뷰를 받아오지 못했습니다.ㅠㅠ')
@@ -148,7 +152,43 @@
             })
         }
 
-        function makeCard(category, image_url, name, company, comment, ref_url) {
+        function agree(name) {
+            // 1. 서버에 1) POST 방식으로, 2) /api/like 라는 url에, 3) name_give라는 이름으로 name을 전달합니다.
+            // 참고) POST 방식이므로 data: {'name_give': name} 과 같은 양식이 되어야합니다!
+            // 2. '좋아요 완료!' 얼럿을 띄웁니다.
+            // 3. 변경된 정보를 반영하기 위해 새로고침합니다.
+            $.ajax({
+                type: 'POST',
+                url: '/agree',
+                data: {'name_give': name},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert('공감 완료!')
+                        window.location.reload()
+                    }
+                }
+            });
+        }
+
+        function disagree(name) {
+            // 1. 서버에 1) POST 방식으로, 2) /api/like 라는 url에, 3) name_give라는 이름으로 name을 전달합니다.
+            // 참고) POST 방식이므로 data: {'name_give': name} 과 같은 양식이 되어야합니다!
+            // 2. '좋아요 완료!' 얼럿을 띄웁니다.
+            // 3. 변경된 정보를 반영하기 위해 새로고침합니다.
+            $.ajax({
+                type: 'POST',
+                url: '/disagree',
+                data: {'name_give': name},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert('반대 완료!')
+                        window.location.reload()
+                    }
+                }
+            });
+        }
+
+        function makeCard(category, image_url, name, company, comment, ref_url, agree, disagree) {
 
 
             if (image_url == '') {
@@ -166,16 +206,32 @@
                           <p class="card-text">${company}</p>
                         <p class="card-text comment">${comment}</p>
                         <a href="${ref_url}" class="btn btn-primary"> 사이트 방문 </a>
-                        </div>
-`
+                        <footer class="card-footer">
+    <a href="#" onclick="agree('${name}')" class="card-footer-item has-text-info">
+      공감 <div id="agree-cnt">${agree} </div>
+      <span class="icon">
+        <i class="fas fa-thumbs-up"></i>
+      </span>
+    </a>
+    <a href="#" onclick="disagree('${name}')" class="card-footer-item has-text-danger">
+      반대 <div id="disagree-cnt">${disagree} </div>
+      <span class="icon">
+        <i class="fas fa-thumbs-down"></i>
+      </span>
+    </a>
+  </footer>
+                        </div>`
             $("#cards-box").append(tempHtml);
         }
+
+
     </script>
 
 </head>
 
 <body>
-<div class="wrap">
+<!--<div class="wrap">-->
+<div class="center">
     <div class="jumbotron">
         <h1 class="display-4">진심어린 리뷰들의 모임 </h1>
         <p class="lead">님아 제발 그 다이어트약을 사지 마오 </p>
